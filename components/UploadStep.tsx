@@ -31,7 +31,7 @@ export function UploadStep({ screen, error, busy, onFiles, onUseSample, onDismis
 
   return (
     <section aria-labelledby="step-bring" className="flex flex-col gap-3">
-      <StepHeading n={1} id="step-bring" title="Bring a screen" hint="Sample loaded. Or add your own." />
+      <StepHeading n={1} id="step-bring" title="Bring a screen" hint="Sample loaded. Or preview your own." />
 
       <input
         ref={inputRef}
@@ -47,6 +47,7 @@ export function UploadStep({ screen, error, busy, onFiles, onUseSample, onDismis
       />
 
       <button
+        id="upload-dropzone"
         type="button"
         onClick={() => inputRef.current?.click()}
         onDragEnter={(e) => {
@@ -77,7 +78,7 @@ export function UploadStep({ screen, error, busy, onFiles, onUseSample, onDismis
           {busy ? "Reading your screenshot…" : dragging ? "Drop to add it" : "Drop a screenshot, or browse"}
         </span>
         <span className="text-xs text-muted">
-          PNG, JPG or WEBP · up to {formatBytes(MAX_BYTES)} · stays in your browser
+          PNG, JPG or WEBP · up to {formatBytes(MAX_BYTES)}
         </span>
       </button>
 
@@ -102,6 +103,10 @@ export function UploadStep({ screen, error, busy, onFiles, onUseSample, onDismis
           </button>
         </div>
       )}
+
+      <p className="-mt-1 text-xs text-muted">
+        Preview only. Nothing is uploaded or sent anywhere: your screenshot stays in this browser tab.
+      </p>
 
       <figure className="overflow-hidden rounded-xl border border-line bg-paper">
         <div className="bg-canvas p-2.5">

@@ -12,14 +12,28 @@ const CHIP_SHAPE: Record<MoodId, string> = {
   experimental: "rounded-none font-bold uppercase -skew-x-6 [font-family:var(--font-space)]",
 }
 
-function MoodOption({ mood, checked, onSelect }: { mood: Mood; checked: boolean; onSelect: () => void }) {
+function MoodOption({
+  mood,
+  checked,
+  disabled,
+  onSelect,
+}: {
+  mood: Mood
+  checked: boolean
+  disabled: boolean
+  onSelect: () => void
+}) {
   const [bg, ink, accent] = mood.swatch
   return (
     <label
       className={[
-        "group relative flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors",
+        "group relative flex min-h-14 items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors",
         "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-forest",
-        checked ? "border-forest bg-paper shadow-[0_0_0_3px_var(--chartreuse)]" : "border-line bg-paper hover:border-line-strong",
+        disabled
+          ? "cursor-not-allowed border-line bg-paper opacity-50"
+          : checked
+            ? "cursor-pointer border-forest bg-paper shadow-[0_0_0_3px_var(--chartreuse)]"
+            : "cursor-pointer border-line bg-paper hover:border-line-strong",
       ].join(" ")}
     >
       <input
@@ -27,6 +41,7 @@ function MoodOption({ mood, checked, onSelect }: { mood: Mood; checked: boolean;
         name="mood"
         value={mood.id}
         checked={checked}
+        disabled={disabled}
         onChange={onSelect}
         className="peer sr-only"
       />
@@ -46,13 +61,33 @@ function MoodOption({ mood, checked, onSelect }: { mood: Mood; checked: boolean;
   )
 }
 
-export function MoodStep({ moodId, onSelect }: { moodId: MoodId; onSelect: (id: MoodId) => void }) {
+export function MoodStep({
+  moodId,
+  disabled,
+  onSelect,
+}: {
+  moodId: MoodId
+  /** True while an uploaded screenshot is shown: moods only apply to the sample screen in this demo. */
+  disabled: boolean
+  onSelect: (id: MoodId) => void
+}) {
   return (
     <section aria-labelledby="step-mood" className="flex flex-col gap-3">
-      <StepHeading n={2} id="step-mood" title="Choose a mood" hint="Four directions, same content." />
+      <StepHeading
+        n={2}
+        id="step-mood"
+        title="Choose a mood"
+        hint={disabled ? "Moods apply to the sample screen in this demo." : "Four directions, same content."}
+      />
       <div role="radiogroup" aria-labelledby="step-mood" className="flex flex-col gap-2">
         {MOODS.map((mood) => (
-          <MoodOption key={mood.id} mood={mood} checked={mood.id === moodId} onSelect={() => onSelect(mood.id)} />
+          <MoodOption
+            key={mood.id}
+            mood={mood}
+            checked={mood.id === moodId}
+            disabled={disabled}
+            onSelect={() => onSelect(mood.id)}
+          />
         ))}
       </div>
       {/* Single-column layouts put the result below the moods, so offer a way down. */}

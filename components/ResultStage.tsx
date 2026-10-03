@@ -1,10 +1,11 @@
 "use client"
 
 import { Info, Repeat, RotateCcw } from "lucide-react"
+import { DemoNotice } from "@/components/DemoNotice"
+import { ExampleGallery } from "@/components/ExampleGallery"
 import { IntensityControl } from "@/components/IntensityControl"
 import { SampleScreen } from "@/components/preview/SampleScreen"
 import { ScaledCanvas } from "@/components/preview/ScaledCanvas"
-import { ScreenshotTreatment } from "@/components/preview/ScreenshotTreatment"
 import { SegmentedControl } from "@/components/SegmentedControl"
 import { StepHeading } from "@/components/StepHeading"
 import { getMood, intensityLabel, type MoodId } from "@/lib/moods"
@@ -25,6 +26,8 @@ type Props = {
   onIntensityChange: (v: number) => void
   onTryAnother: () => void
   onStartOver: () => void
+  onUseSample: () => void
+  onOpenExample: (mood: MoodId, intensity: number) => void
 }
 
 function Panel({
@@ -66,54 +69,55 @@ export function ResultStage({
   onIntensityChange,
   onTryAnother,
   onStartOver,
+  onUseSample,
+  onOpenExample,
 }: Props) {
   const mood = getMood(moodId)
   const isSample = screen.kind === "sample"
   const aspect = isSample ? SAMPLE_WIDTH / SAMPLE_HEIGHT : Math.min(3, Math.max(0.4, screen.width / screen.height))
-  const afterLabel = `After · ${mood.name}`
+  const level = intensityLabel(intensity).toLowerCase()
 
   const original = isSample ? (
     <ScaledCanvas width={SAMPLE_WIDTH} height={SAMPLE_HEIGHT}>
       <SampleScreen kind="original" intensity={0} label="Original sample screen: a meal-planning app" />
     </ScaledCanvas>
   ) : (
-    // eslint-disable-next-line @next/next/no-img-element -- local blob URL
+    // eslint-disable-next-line @next/next/no-img-element -- local blob URL, never leaves the browser
     <img src={screen.url} alt={`Your original screenshot, ${screen.name}`} className="block h-auto w-full" />
   )
 
+  // For an upload, the "After" slot is the demo notice: never a filtered, placeholder or pre-made image.
   const after = isSample ? (
     <ScaledCanvas width={SAMPLE_WIDTH} height={SAMPLE_HEIGHT}>
       <SampleScreen
         kind={moodId}
         intensity={intensity}
-        label={`${mood.name} redesign concept of the sample screen at ${intensityLabel(intensity).toLowerCase()} intensity`}
+        label={`${mood.name} redesign concept of the sample screen at ${level} intensity`}
       />
     </ScaledCanvas>
   ) : (
-    <ScreenshotTreatment
-      src={screen.url}
-      alt={`${mood.name} treatment of your screenshot at ${intensityLabel(intensity).toLowerCase()} intensity`}
-      mood={moodId}
-      intensity={intensity}
-    />
+    <DemoNotice aspect={aspect} onUseSample={onUseSample} />
   )
 
   return (
     <section aria-labelledby="step-explore" className="mx-auto flex w-full max-w-[1100px] flex-col gap-5">
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <StepHeading n={3} id="step-explore" title="Explore the result" hint={`${mood.name} direction · ${mood.tagline.toLowerCase()}`} />
+        <StepHeading
+          n={3}
+          id="step-explore"
+          title="Explore the result"
+          hint={isSample ? `${mood.name} direction · ${mood.tagline.toLowerCase()}` : "AI redesign is off in this demo"}
+        />
         <SegmentedControl name="view" legend="Preview layout" options={VIEW_OPTIONS} value={view} onChange={onViewChange} />
       </div>
 
       <div className="af-stage rounded-2xl border border-line p-4 sm:p-8">
-        {/* Keying on mood (not intensity) gives a gentle crossfade when the direction changes, and none while dragging the slider. */}
+        {/* Keying on mood + view gives a gentle crossfade when the direction changes, and none while dragging the slider. */}
         <div
-          key={moodId + view}
+          key={moodId + view + screen.kind}
           className={[
             "af-fade-in",
-            view === "after"
-              ? "flex justify-center"
-              : "grid items-start justify-items-center gap-6 md:grid-cols-2",
+            view === "after" ? "flex justify-center" : "grid items-start justify-items-center gap-6 md:grid-cols-2",
           ].join(" ")}
         >
           {view === "side" && (
@@ -121,19 +125,23 @@ export function ResultStage({
               {original}
             </Panel>
           )}
-          <Panel label={afterLabel} accent aspect={aspect}>
+          <Panel label={isSample ? `After · ${mood.name}` : "After · not available"} accent={isSample} aspect={aspect}>
             {after}
           </Panel>
         </div>
       </div>
 
       <div className="flex flex-col gap-4 rounded-2xl border border-line bg-paper p-4 sm:p-5 md:flex-row md:items-center md:gap-8">
-        <IntensityControl value={intensity} onChange={onIntensityChange} />
+        <div className="min-w-0 flex-1">
+          <IntensityControl value={intensity} disabled={!isSample} onChange={onIntensityChange} />
+          {!isSample && <p className="mt-1 text-xs text-muted">Mood and intensity apply to the sample screen only.</p>}
+        </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={onTryAnother}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-forest px-5 text-sm font-semibold text-paper transition-colors hover:bg-forest-deep focus-visible:outline-offset-4"
+            disabled={!isSample}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-forest px-5 text-sm font-semibold text-paper transition-colors hover:bg-forest-deep disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-forest"
           >
             <Repeat aria-hidden="true" className="size-4" />
             Try another mood
@@ -154,10 +162,12 @@ export function ResultStage({
         <p>
           <strong className="font-semibold">These are explorations, not production-ready designs.</strong>{" "}
           {isSample
-            ? "Afterform works from screenshots only in this prototype: it doesn’t read HTML or generate working code."
-            : "For your own screenshots, this prototype re-tones and reframes the image for each mood; it doesn’t rebuild the layout. Switch to the sample screen to see a full recomposition. Afterform doesn’t read HTML or generate working code."}
+            ? "This is a public demo: the sample screen is redesigned in your browser, with no AI and no server. Afterform doesn’t read HTML or generate working code."
+            : "This is a public demo with AI redesign turned off, so your screenshot is shown as-is for preview only. It stays in your browser. Afterform doesn’t read HTML or generate working code."}
         </p>
       </div>
+
+      {!isSample && <ExampleGallery onOpen={onOpenExample} />}
     </section>
   )
 }

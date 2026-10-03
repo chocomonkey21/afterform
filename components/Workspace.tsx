@@ -12,7 +12,10 @@ import { SAMPLE_SCREEN, type ScreenState, type ViewMode } from "@/lib/screen"
 
 const TOAST_MS = 3200
 
-/** Owns all prototype state: which screen, which mood, how bold, and which view. */
+/**
+ * Owns all prototype state: which screen, which mood, how bold, and which view.
+ * Public demo: everything here runs in the browser. There is no network call anywhere in this file.
+ */
 export function Workspace() {
   const [screen, setScreen] = useState<ScreenState>(SAMPLE_SCREEN)
   const [moodId, setMoodId] = useState<MoodId>(DEFAULT_MOOD)
@@ -70,8 +73,8 @@ export function Workspace() {
       setScreen({ kind: "upload", ...result })
       showToast(
         files.length > 1
-          ? "Screenshot added. Only the first file was used."
-          : "Screenshot added. The original preview is updated.",
+          ? "Screenshot added for preview. Only the first file was used."
+          : "Screenshot added for preview. AI redesign is off in this demo.",
       )
     },
     [showToast],
@@ -83,6 +86,19 @@ export function Workspace() {
     setError(null)
     setScreen(SAMPLE_SCREEN)
     showToast("Back to the sample screen.")
+  }
+
+  function openExample(mood: MoodId, level: number) {
+    uploadToken.current += 1
+    setBusy(false)
+    setError(null)
+    setScreen(SAMPLE_SCREEN)
+    setMoodId(mood)
+    setIntensity(level)
+    setView("after")
+    showToast(`Now exploring ${getMood(mood).name} on the sample screen.`)
+    // Bring the live preview into view (matters on single-column layouts).
+    window.requestAnimationFrame(() => document.getElementById("step-explore")?.scrollIntoView({ block: "start" }))
   }
 
   function tryAnotherMood() {
@@ -122,7 +138,7 @@ export function Workspace() {
             onUseSample={backToSample}
             onDismissError={() => setError(null)}
           />
-          <MoodStep moodId={moodId} onSelect={setMoodId} />
+          <MoodStep moodId={moodId} disabled={screen.kind === "upload"} onSelect={setMoodId} />
         </div>
       </aside>
 
@@ -136,6 +152,8 @@ export function Workspace() {
           onIntensityChange={setIntensity}
           onTryAnother={tryAnotherMood}
           onStartOver={startOver}
+          onUseSample={backToSample}
+          onOpenExample={openExample}
         />
       </main>
 

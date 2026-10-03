@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:demo": "node scripts/check-no-paid-ai.mjs",
+    "prebuild": "node scripts/check-no-paid-ai.mjs",
+    "postbuild": "node scripts/check-no-paid-ai.mjs --built"
   },
   "dependencies": {
     "lucide-react": "^0.562.0",
