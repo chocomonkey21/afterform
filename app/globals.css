@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/* Afterform palette: warm off-white canvas, deep forest actions, soft chartreuse accents, fine neutral borders. */
+:root {
+  --canvas: #f6f3ec;
+  --panel: #fbf9f4;
+  --paper: #fffdf8;
+  --ink: #1b2a22;
+  --muted: #5b665e;
+  --line: #e3ded2;
+  --line-strong: #cfc9b8;
+  --forest: #1f4d3a;
+  --forest-deep: #173b2c;
+  --chartreuse: #d7e86b;
+  --chartreuse-soft: #eaf2b8;
+  --danger: #9a2f24;
+  --danger-soft: #fbece9;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-panel: var(--panel);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-forest: var(--forest);
+  --color-forest-deep: var(--forest-deep);
+  --color-chartreuse: var(--chartreuse);
+  --color-chartreuse-soft: var(--chartreuse-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, serif;
+}
+
+html {
+  background: var(--canvas);
+  color-scheme: light;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Keyboard focus: always visible, never colour-only on dark surfaces. */
+:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--chartreuse);
+  color: var(--ink);
+}
+
+/* Stage backdrop: fine dot grid, like a design canvas. */
+.af-stage {
+  background-color: var(--panel);
+  background-image: radial-gradient(circle, #d9d3c4 1px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+
+/* Intensity slider. --fill is set inline from the value. */
+.af-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px; /* generous hit area; the visible track is thinner */
+  background: transparent;
+  cursor: pointer;
+}
+.af-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--forest) var(--fill), var(--line-strong) var(--fill));
+}
+.af-range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+.af-range::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--forest);
+}
+.af-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: var(--chartreuse);
+  border: 2px solid var(--forest);
+  box-shadow: 0 1px 3px rgb(27 42 34 / 0.25);
+  transition: transform 0.15s ease;
+}
+.af-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--chartreuse);
+  border: 2px solid var(--forest);
+  box-shadow: 0 1px 3px rgb(27 42 34 / 0.25);
+}
+.af-range:active::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+.af-range:focus-visible {
+  outline: none;
+}
+.af-range:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--forest);
+  outline-offset: 3px;
+}
+.af-range:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--forest);
+  outline-offset: 3px;
+}
+
+/* Small, purposeful motion. */
+@keyframes af-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes af-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+.af-fade-in {
+  animation: af-fade-in 0.28s ease-out both;
+}
+.af-toast-in {
+  animation: af-toast-in 0.22s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
